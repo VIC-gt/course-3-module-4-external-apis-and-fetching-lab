@@ -1,7 +1,7 @@
 const input = document.getElementById("stateInput");
 const button = document.getElementById("getAlertsBtn");
-const alertsDiv = document.getElementById("alerts");
-const errorP = document.getElementById("error");
+const alertsDiv = document.getElementById("alerts-container");
+const errorP = document.getElementById("error-message");
 const title = document.getElementById("title");
 
 // Fetch
@@ -19,8 +19,6 @@ async function fetchWeatherData(state) {
 function displayWeather(data) {
   alertsDiv.innerHTML = "";
   errorP.textContent = "";
-
-  // ✅ HIDE ERROR
   errorP.classList.add("hidden");
 
   const alerts = data.features;
@@ -41,8 +39,6 @@ function displayWeather(data) {
 // Display error
 function displayError(message) {
   errorP.textContent = message;
-
-  // ✅ SHOW ERROR
   errorP.classList.remove("hidden");
 
   alertsDiv.innerHTML = "";
@@ -62,7 +58,6 @@ button.addEventListener("click", async () => {
     const data = await fetchWeatherData(state);
     displayWeather(data);
 
-    // ✅ CLEAR INPUT
     input.value = "";
 
   } catch (error) {
