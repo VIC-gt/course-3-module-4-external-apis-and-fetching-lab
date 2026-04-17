@@ -1,34 +1,26 @@
-const baseURL = "https://api.weather.gov/alerts?area=";
 
+const baseURL = "https://api.weather.gov/alerts/active?area=";
+
+// DOM elements (MATCH TEST IDS)
 const input = document.getElementById("state-input");
 const button = document.getElementById("get-weather");
-const results = document.getElementById("results");
-const errorBox = document.getElementById("error");
+const display = document.getElementById("alerts-display");
+const errorBox = document.getElementById("error-message");
 
 
+// CLICK EVENT
 button.addEventListener("click", async function () {
   const state = input.value.trim().toUpperCase();
 
+  // clear error first
   errorBox.textContent = "";
-  errorBox.style.display = "none";
+  errorBox.classList.add("hidden");
 
-  input.value = ""; // required test
-
-  await fetchWeatherData(state);
-});
-
-
-async function fetchWeatherData(state) {
   try {
-    if (!state) {
-      displayError("State is required");
-      return;
-    }
-
     const response = await fetch(baseURL + state);
 
     if (!response.ok) {
-      throw new Error("Fetch failed");
+      throw new Error("Network failure");
     }
 
     const data = await response.json();
@@ -36,36 +28,40 @@ async function fetchWeatherData(state) {
     displayWeather(data);
 
   } catch (err) {
-    displayError("Failed to fetch weather alerts");
+    displayError("Network failure");
   }
-}
+
+  // required: clear input
+  input.value = "";
+});
 
 
+// DISPLAY DATA
 function displayWeather(data) {
-  results.innerHTML = "";
+  display.innerHTML = "";
 
   errorBox.textContent = "";
-  errorBox.style.display = "none";
+  errorBox.classList.add("hidden");
 
   const alerts = data.features || [];
 
   const title = document.createElement("h2");
-  title.textContent =
-    `Current watches, warnings, and advisories: ${alerts.length}`;
+  title.textContent = `Weather Alerts: ${alerts.length}`;
 
-  results.appendChild(title);
+  display.appendChild(title);
 
   alerts.forEach(alert => {
     const p = document.createElement("p");
     p.textContent = alert.properties.headline;
-    results.appendChild(p);
+    display.appendChild(p);
   });
 }
 
 
+// DISPLAY ERROR
 function displayError(message) {
-  results.innerHTML = "";
+  display.innerHTML = "";
 
   errorBox.textContent = message;
-  errorBox.style.display = "block";
+  errorBox.classList.remove("hidden");
 }
