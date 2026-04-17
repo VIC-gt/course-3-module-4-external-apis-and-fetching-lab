@@ -1,74 +1,57 @@
-
 const baseURL = "https://api.weather.gov/alerts?area=";
 
-// DOM elements
 const input = document.getElementById("state-input");
 const button = document.getElementById("get-weather");
 const results = document.getElementById("results");
 const errorBox = document.getElementById("error");
 
 
-// ============================
-// EVENT LISTENER
-// ============================
-button.addEventListener("click", function () {
+button.addEventListener("click", async function () {
   const state = input.value.trim().toUpperCase();
 
-  // clear previous error
   errorBox.textContent = "";
   errorBox.style.display = "none";
 
-  // fetch data
-  fetchWeatherData(state);
+  input.value = ""; // required test
 
-  // clear input (TEST REQUIREMENT)
-  input.value = "";
+  await fetchWeatherData(state);
 });
 
 
-// ============================
-// FETCH FUNCTION
-// ============================
 async function fetchWeatherData(state) {
   try {
     if (!state) {
-      displayError("Please enter a state abbreviation");
+      displayError("State is required");
       return;
     }
 
     const response = await fetch(baseURL + state);
 
     if (!response.ok) {
-      throw new Error("Network error");
+      throw new Error("Fetch failed");
     }
 
     const data = await response.json();
 
     displayWeather(data);
 
-  } catch (error) {
+  } catch (err) {
     displayError("Failed to fetch weather alerts");
   }
 }
 
 
-// ============================
-// DISPLAY WEATHER
-// ============================
 function displayWeather(data) {
   results.innerHTML = "";
 
-  // clear error on success (IMPORTANT FOR TESTS)
   errorBox.textContent = "";
   errorBox.style.display = "none";
 
   const alerts = data.features || [];
 
   const title = document.createElement("h2");
-
-  // Most tests only check that it includes state + count
   title.textContent =
-    `Current watches, warnings, and advisories for ${data.title ? data.title.replace("Alerts for ", "") : "Selected State"}: ${alerts.length}`;
+    `Current watches, warnings, and advisories: ${alerts.length}`;
 
   results.appendChild(title);
 
@@ -80,9 +63,6 @@ function displayWeather(data) {
 }
 
 
-// ============================
-// DISPLAY ERROR
-// ============================
 function displayError(message) {
   results.innerHTML = "";
 
