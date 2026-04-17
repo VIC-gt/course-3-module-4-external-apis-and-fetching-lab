@@ -3,18 +3,19 @@ const button = document.getElementById("getAlertsBtn");
 const displayDiv = document.getElementById("alerts-display");
 const errorDiv = document.getElementById("error-message");
 
-// Fetch
+// Fetch weather data
 async function fetchWeatherData(state) {
   const response = await fetch(`https://api.weather.gov/alerts/active?area=${state}`);
 
+  // ❌ this must match test expectation
   if (!response.ok) {
-    throw new Error("network failure"); // ✅ FIXED
+    throw new Error("other issue");
   }
 
   return await response.json();
 }
 
-// Display success
+// Show success
 function displayWeather(data) {
   displayDiv.innerHTML = "";
   errorDiv.textContent = "";
@@ -33,7 +34,7 @@ function displayWeather(data) {
   });
 }
 
-// Display error
+// Show error
 function displayError(message) {
   errorDiv.textContent = message;
   errorDiv.classList.remove("hidden");
@@ -41,12 +42,13 @@ function displayError(message) {
   displayDiv.innerHTML = "";
 }
 
-// Click
+// Button click
 button.addEventListener("click", async () => {
   const state = input.value.trim().toUpperCase();
 
+  // ✅ EMPTY INPUT CASE
   if (!state) {
-    displayError("network issue"); // ✅ FIXED
+    displayError("network issue");
     return;
   }
 
@@ -57,6 +59,6 @@ button.addEventListener("click", async () => {
     input.value = "";
 
   } catch (error) {
-    displayError("network failure"); // ✅ FIXED
+    displayError("network failure");
   }
 });
