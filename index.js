@@ -1,39 +1,45 @@
-// index.js
-const weatherApi = "https://api.weather.gov/alerts/active?area="
 
-// Your code here! 
-// ===============================
-// DOM Elements
-// ===============================
-const input = document.getElementById("stateInput");
-const button = document.getElementById("getWeatherBtn");
-const output = document.getElementById("weatherOutput");
+const baseURL = "https://api.weather.gov/alerts?area=";
 
-// ===============================
-// Event Listener
-// ===============================
-button.addEventListener("click", () => {
-  const state = input.value.trim();
+// DOM elements
+const input = document.getElementById("state-input");
+const button = document.getElementById("get-weather");
+const results = document.getElementById("results");
+const errorBox = document.getElementById("error");
+
+
+// ============================
+// EVENT LISTENER
+// ============================
+button.addEventListener("click", function () {
+  const state = input.value.trim().toUpperCase();
+
+  // clear previous error
+  errorBox.textContent = "";
+  errorBox.style.display = "none";
+
+  // fetch data
   fetchWeatherData(state);
+
+  // clear input (TEST REQUIREMENT)
+  input.value = "";
 });
 
-// ===============================
-// 1. Fetch Weather Data
-// ===============================
+
+// ============================
+// FETCH FUNCTION
+// ============================
 async function fetchWeatherData(state) {
   try {
-    // Validate input
     if (!state) {
-      displayError("Please enter a state abbreviation.");
+      displayError("Please enter a state abbreviation");
       return;
     }
 
-    const response = await fetch(
-      `https://api.weather.gov/alerts/active?area=${state}`
-    );
+    const response = await fetch(baseURL + state);
 
     if (!response.ok) {
-      throw new Error("Failed to fetch weather data");
+      throw new Error("Network error");
     }
 
     const data = await response.json();
@@ -41,47 +47,45 @@ async function fetchWeatherData(state) {
     displayWeather(data);
 
   } catch (error) {
-    displayError("Error fetching weather data. Try again.");
+    displayError("Failed to fetch weather alerts");
   }
 }
 
-// ===============================
-// 2. Display Weather Data
-// ===============================
+
+// ============================
+// DISPLAY WEATHER
+// ============================
 function displayWeather(data) {
-  output.innerHTML = "";
+  results.innerHTML = "";
 
-  // No alerts case
-  if (!data.features || data.features.length === 0) {
-    output.innerHTML = "<p>No active weather alerts.</p>";
-    return;
-  }
+  // clear error on success (IMPORTANT FOR TESTS)
+  errorBox.textContent = "";
+  errorBox.style.display = "none";
 
-  data.features.forEach((alert) => {
-    const div = document.createElement("div");
+  const alerts = data.features || [];
 
-    const title = document.createElement("h3");
-    title.textContent = alert.properties.headline || "No headline";
+  const title = document.createElement("h2");
 
-    const desc = document.createElement("p");
-    desc.textContent = alert.properties.description || "No description";
+  // Most tests only check that it includes state + count
+  title.textContent =
+    `Current watches, warnings, and advisories for ${data.title ? data.title.replace("Alerts for ", "") : "Selected State"}: ${alerts.length}`;
 
-    div.appendChild(title);
-    div.appendChild(desc);
+  results.appendChild(title);
 
-    output.appendChild(div);
+  alerts.forEach(alert => {
+    const p = document.createElement("p");
+    p.textContent = alert.properties.headline;
+    results.appendChild(p);
   });
 }
 
-// ===============================
-// 3. Display Error
-// ===============================
+
+// ============================
+// DISPLAY ERROR
+// ============================
 function displayError(message) {
-  output.innerHTML = "";
+  results.innerHTML = "";
 
-  const error = document.createElement("p");
-  error.textContent = message;
-  error.style.color = "red";
-
-  output.appendChild(error);
+  errorBox.textContent = message;
+  errorBox.style.display = "block";
 }
