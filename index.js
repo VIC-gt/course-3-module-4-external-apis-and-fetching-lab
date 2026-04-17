@@ -1,64 +1,38 @@
-const input = document.getElementById("stateInput");
-const button = document.getElementById("getAlertsBtn");
-const displayDiv = document.getElementById("alerts-display");
-const errorDiv = document.getElementById("error-message");
+async function fetchWeatherAlerts(state) {
+  const input = document.querySelector('input');
+  const alertsDisplay = document.querySelector('#alerts-display');
+  const errorDiv = document.querySelector('#error-message');
 
-// Fetch weather data
-async function fetchWeatherData(state) {
-  const response = await fetch(`https://api.weather.gov/alerts/active?area=${state}`);
-
-  // ❌ this must match test expectation
-  if (!response.ok) {
-    throw new Error("other issue");
-  }
-
-  return await response.json();
-}
-
-// Show success
-function displayWeather(data) {
-  displayDiv.innerHTML = "";
-  errorDiv.textContent = "";
-  errorDiv.classList.add("hidden");
-
-  const alerts = data.features;
-
-  const header = document.createElement("h2");
-  header.textContent = `Weather Alerts: ${alerts.length}`;
-  displayDiv.appendChild(header);
-
-  alerts.forEach(alert => {
-    const p = document.createElement("p");
-    p.textContent = alert.properties.headline;
-    displayDiv.appendChild(p);
-  });
-}
-
-// Show error
-function displayError(message) {
-  errorDiv.textContent = message;
-  errorDiv.classList.remove("hidden");
-
-  displayDiv.innerHTML = "";
-}
-
-// Button click
-button.addEventListener("click", async () => {
-  const state = input.value.trim().toUpperCase();
-
-  // ✅ EMPTY INPUT CASE
-  if (!state) {
-    displayError("network issue");
-    return;
-  }
+  input.value = '';
 
   try {
-    const data = await fetchWeatherData(state);
-    displayWeather(data);
+    const response = await fetch(`https://api.weather.gov/alerts/active?area=${state}`);
+    const data = await response.json();
 
-    input.value = "";
+    errorDiv.textContent = '';
+    errorDiv.classList.add('hidden');
+
+    const count = data.features.length;
+    alertsDisplay.innerHTML = `<p>${data.title}: ${count}</p>`;
+
+    data.features.forEach((feature) => {
+      const p = document.createElement('p');
+      p.textContent = feature.properties.headline;
+      alertsDisplay.appendChild(p);
+    });
 
   } catch (error) {
-    displayError("network failure");
+    errorDiv.textContent = error.message;
+    errorDiv.classList.remove('hidden');
   }
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+  const button = document.querySelector('button');
+  const input = document.querySelector('input');
+
+  button.addEventListener('click', () => {
+    const state = input.value;
+    fetchWeatherAlerts(state);
+  });
 });
