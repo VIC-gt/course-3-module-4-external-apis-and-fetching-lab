@@ -2,23 +2,18 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Weather Alerts</title>
+  <title>Weather Alerts App</title>
 </head>
 <body>
 
   <h1>Weather Alerts</h1>
 
-  <!-- INPUT -->
-  <input id="state-input" placeholder="Enter state abbreviation" />
+  <input type="text" id="stateInput" placeholder="Enter state (e.g. NY)">
+  <button id="getAlertsBtn">Get Weather Alerts</button>
 
-  <!-- BUTTON -->
-  <button id="get-weather">Get Weather Alerts</button>
-
-  <!-- ERROR (MUST MATCH TEST) -->
-  <div id="error-message" class="hidden"></div>
-
-  <!-- RESULTS (MUST MATCH TEST) -->
-  <div id="alerts-display"></div>
+  <h2 id="title"></h2>
+  <div id="alerts"></div>
+  <p id="error" style="color:red;"></p>
 
   <script src="index.js"></script>
 </body>

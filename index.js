@@ -1,67 +1,66 @@
+const input = document.getElementById("stateInput");
+const button = document.getElementById("getAlertsBtn");
+const alertsDiv = document.getElementById("alerts");
+const errorP = document.getElementById("error");
+const title = document.getElementById("title");
 
-const baseURL = "https://api.weather.gov/alerts/active?area=";
+// Fetch weather alerts
+async function fetchWeatherData(state) {
+  const response = await fetch(`https://api.weather.gov/alerts/active?area=${state}`);
 
-// DOM elements (MATCH TEST IDS)
-const input = document.getElementById("state-input");
-const button = document.getElementById("get-weather");
-const display = document.getElementById("alerts-display");
-const errorBox = document.getElementById("error-message");
-
-
-// CLICK EVENT
-button.addEventListener("click", async function () {
-  const state = input.value.trim().toUpperCase();
-
-  // clear error first
-  errorBox.textContent = "";
-  errorBox.classList.add("hidden");
-
-  try {
-    const response = await fetch(baseURL + state);
-
-    if (!response.ok) {
-      throw new Error("Network failure");
-    }
-
-    const data = await response.json();
-
-    displayWeather(data);
-
-  } catch (err) {
-    displayError("Network failure");
+  if (!response.ok) {
+    throw new Error("Network failure");
   }
 
-  // required: clear input
-  input.value = "";
-});
+  const data = await response.json();
+  return data;
+}
 
-
-// DISPLAY DATA
+// Display weather alerts
 function displayWeather(data) {
-  display.innerHTML = "";
+  alertsDiv.innerHTML = "";
+  errorP.textContent = "";
 
-  errorBox.textContent = "";
-  errorBox.classList.add("hidden");
+  const alerts = data.features;
 
-  const alerts = data.features || [];
+  // Extract state name properly
+  const stateName = data.title.includes("for")
+    ? data.title.split("for ")[1]
+    : "Selected State";
 
-  const title = document.createElement("h2");
-  title.textContent = `Weather Alerts: ${alerts.length}`;
-
-  display.appendChild(title);
+  title.textContent = `Current watches, warnings, and advisories for ${stateName}: ${alerts.length}`;
 
   alerts.forEach(alert => {
     const p = document.createElement("p");
     p.textContent = alert.properties.headline;
-    display.appendChild(p);
+    alertsDiv.appendChild(p);
   });
 }
 
-
-// DISPLAY ERROR
+// Display error message
 function displayError(message) {
-  display.innerHTML = "";
-
-  errorBox.textContent = message;
-  errorBox.classList.remove("hidden");
+  errorP.textContent = message;
+  alertsDiv.innerHTML = "";
+  title.textContent = "";
 }
+
+// Button click event
+button.addEventListener("click", async () => {
+  const state = input.value.trim().toUpperCase();
+
+  if (!state) {
+    displayError("Please enter a state abbreviation");
+    return;
+  }
+
+  try {
+    const data = await fetchWeatherData(state);
+    displayWeather(data);
+
+    // Clear input after success
+    input.value = "";
+
+  } catch (error) {
+    displayError("Network failure");
+  }
+});
