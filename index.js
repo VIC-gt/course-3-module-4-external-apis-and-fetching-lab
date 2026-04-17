@@ -4,7 +4,7 @@ const alertsDiv = document.getElementById("alerts");
 const errorP = document.getElementById("error");
 const title = document.getElementById("title");
 
-// Fetch weather alerts
+// Fetch
 async function fetchWeatherData(state) {
   const response = await fetch(`https://api.weather.gov/alerts/active?area=${state}`);
 
@@ -12,18 +12,19 @@ async function fetchWeatherData(state) {
     throw new Error("Network failure");
   }
 
-  const data = await response.json();
-  return data;
+  return await response.json();
 }
 
-// Display weather alerts
+// Display success
 function displayWeather(data) {
   alertsDiv.innerHTML = "";
   errorP.textContent = "";
 
+  // ✅ HIDE ERROR
+  errorP.classList.add("hidden");
+
   const alerts = data.features;
 
-  // Extract state name properly
   const stateName = data.title.includes("for")
     ? data.title.split("for ")[1]
     : "Selected State";
@@ -37,14 +38,18 @@ function displayWeather(data) {
   });
 }
 
-// Display error message
+// Display error
 function displayError(message) {
   errorP.textContent = message;
+
+  // ✅ SHOW ERROR
+  errorP.classList.remove("hidden");
+
   alertsDiv.innerHTML = "";
   title.textContent = "";
 }
 
-// Button click event
+// Click
 button.addEventListener("click", async () => {
   const state = input.value.trim().toUpperCase();
 
@@ -57,7 +62,7 @@ button.addEventListener("click", async () => {
     const data = await fetchWeatherData(state);
     displayWeather(data);
 
-    // Clear input after success
+    // ✅ CLEAR INPUT
     input.value = "";
 
   } catch (error) {
